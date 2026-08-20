@@ -1,1 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turnos · Lavandería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #E9F1F0;
+    --surface: #FFFFFF;
+    --ink: #1B2A2E;
+    --ink-soft: #5B6E70;
+    --line: #C9D8D6;
+    --washer: #2F8F86;
+    --washer-soft: #DCEEEB;
+    --dryer: #E39A2E;
+    --dryer-soft: #FBEAD2;
+    --taken: #B5544A;
+    --taken-soft: #F3E0DD;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 16px;}
 
+  /* Banner de link nuevo */
+  .setup-banner{
+    background:var(--ink);
+    color:#fff;
+    padding:14px 16px;
+    font-size:13.5px;
+    line-height:1.5;
+  }
+  .setup-banner b{font-family:'Space Grotesk',sans-serif;}
+  .setup-banner .row{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .setup-banner input{
+    flex:1;
+    min-width:180px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:8px 10px;
+    border-radius:8px;
+    border:none;
+    background:rgba(255,255,255,.12);
+    color:#fff;
+  }
+  .setup-banner button{
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    border:none;
+    border-radius:8px;
+    padding:9px 14px;
+    background:var(--washer);
+    color:#fff;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .setup-banner .close{
+    background:transparent;
+    color:rgba(255,255,255,.6);
+    padding:4px 8px;
+  }
+
+  /* Header */
+  header{padding:28px 16px 18px;}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .brand svg{flex-shrink:0;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.05;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:26px;
+    font-weight:700;
+    margin:2px 0 0;
+    letter-spacing:-.01em;
+  }
+
+  /* Clothesline divider */
+  .line{
+    position:relative;
+    height:14px;
+    margin:6px 0 20px;
+    background-image: repeating-linear-gradient(to right, var(--line) 0, var(--line) 6px, transparent 6px, transparent 14px);
+    background-position: 0 6px;
+    background-size: 100% 2px;
+    background-repeat: repeat-x;
+  }
+  .line span{
+    position:absolute;
+    top:0;
+    width:8px;height:12px;
+    border-radius:2px;
+  }
+  .line span:nth-child(1){left:18%;background:var(--washer);transform:rotate(-6deg);}
+  .line span:nth-child(2){left:47%;background:var(--dryer);transform:rotate(5deg);}
+  .line span:nth-child(3){left:76%;background:var(--washer);transform:rotate(-3deg);}
+
+  /* Name capture */
+  .who{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .who label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .who input{
+    flex:1;
+    border:none;
+    background:transparent;
+    font-family:'Work Sans',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    outline:none;
+    min-width:0;
+  }
+  .who input::placeholder{color:#9BAAAA;font-weight:400;}
+
+  /* Day tabs */
+  .days{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    margin-bottom:22px;
+    scrollbar-width:none;
+  }
+  .days::-webkit-scrollbar{display:none;}
+  .day-btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 12px;
+    white-space:nowrap;
+    cursor:pointer;
+    text-align:center;
+    min-width:58px;
+    transition:transform .12s ease;
+  }
+  .day-btn .num{display:block;font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--ink);margin-top:2px;}
+  .day-btn.active{background:var(--ink);border-color:var(--ink);}
+  .day-btn.active,.day-btn.active .num{color:#fff;}
+  .day-btn:active{transform:scale(.96);}
+
+  /* Machine sections */
+  .machines{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:18px;
+  }
+  .machine{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+  }
+  .machine-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .m-icon{
+    width:34px;height:34px;
+    border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .washer .m-icon{background:var(--washer-soft);}
+  .dryer .m-icon{background:var(--dryer-soft);}
+  .m-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;}
+  .m-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-top:1px;}
+
+  /* Ticket rows */
+  .slots{display:flex;flex-direction:column;gap:8px;}
+  .slot{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:10px 12px 10px 16px;
+    cursor:pointer;
+    background:#FBFDFC;
+    transition:transform .1s ease;
+  }
+  .slot::before{
+    content:"";
+    position:absolute;
+    left:-6px;top:50%;
+    width:11px;height:11px;
+    border-radius:50%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    transform:translateY(-50%);
+  }
+  .slot:active{transform:scale(.985);}
+  .slot .time{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink);
+    min-width:70px;
+  }
+  .slot .status{
+    flex:1;
+    font-size:13px;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  .slot.free{}
+  .slot.free .status{color:var(--washer);font-weight:600;}
+  .machine.dryer .slot.free .status{color:var(--dryer);}
+  .slot.mine{background:var(--washer-soft);border-style:solid;border-color:var(--washer);}
+  .machine.dryer .slot.mine{background:var(--dryer-soft);border-color:var(--dryer);}
+  .slot.mine .status{color:var(--ink);font-weight:600;}
+  .slot.taken{background:var(--taken-soft);border-style:solid;border-color:#E3C7C3;cursor:default;}
+  .slot.taken .status{color:var(--taken);}
+  .slot.taken:active{transform:none;}
+  .slot.loading{opacity:.4;pointer-events:none;}
+
+  .hint{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:26px;
+    line-height:1.6;
+  }
+
+  .toast{
+    position:fixed;
+    left:50%;bottom:20px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ink);
+    color:#fff;
+    font-family:'Work Sans',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    padding:11px 18px;
+    border-radius:10px;
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+    z-index:20;
+    max-width:90%;
+    text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="setup-banner" id="setupBanner" style="display:none;"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <rect x="1" y="1" width="28" height="28" rx="8" fill="#1B2A2E"/>
+        <path d="M15 8v3M15 8l-2.2 2.2M15 8l2.2 2.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="15" cy="19" r="6" stroke="#fff" stroke-width="1.6"/>
+        <path d="M12.3 19c0-1.6 1.3-2.7 2.7-1.6 1.4 1.1 2.7 0 2.7-1.6" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <span class="eyebrow">Lavandería del edificio</span>
+        <h1>Turnos de máquinas</h1>
+      </div>
+    </div>
+    <div class="line"><span></span><span></span><span></span></div>
+
+    <div class="who">
+      <label for="nameInput">TU DEPARTAMENTO</label>
+      <input id="nameInput" type="text" placeholder="ej: 4B" maxlength="12">
+    </div>
+
+    <div class="days" id="days"></div>
+  </header>
+
+  <div class="machines" id="machines">
+    <div class="machine washer">
+      <div class="machine-head">
+        <div class="m-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#2F8F86" stroke-width="1.6"/><path d="M6.5 9c0-1.4 1.1-2.3 2.3-1.4 1.2 1 2.3 0 2.3-1.4" stroke="#2F8F86" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="m-title">Lavadora</div>
+          <div class="m-sub">turnos de 40 min</div>
+        </div>
+      </div>
+      <div class="slots" id="washerSlots"></div>
+    </div>
+
+    <div class="machine dryer">
+      <div class="machine-head">
+        <div class="m-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#E39A2E" stroke-width="1.6"/><path d="M9 3.2V5M9 13v1.8M3.2 9H5M13 9h1.8" stroke="#E39A2E" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="m-title">Secadora</div>
+          <div class="m-sub">turnos de 1 hora</div>
+        </div>
+      </div>
+      <div class="slots" id="dryerSlots"></div>
+    </div>
+  </div>
+
+  <div class="hint">TOCÁ UN TURNO LIBRE PARA RESERVARLO · TOCÁ EL TUYO PARA CANCELARLO</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== Config ===================== */
+const DURATION = { washer: 40, dryer: 60 }; // minutos
+const WINDOW_START = 0;      // 00:00
+const WINDOW_END   = 24*60;  // 24:00
+const API_BASE = 'https://jsonblob.com/api/jsonBlob';
+
+function buildSlots(duration){
+  const slots = [];
+  let start = WINDOW_START;
+  while(start < WINDOW_END){ slots.push(start); start += duration; }
+  return slots;
+}
+const SLOTS = { washer: buildSlots(DURATION.washer), dryer: buildSlots(DURATION.dryer) };
+
+const DAY_MS = 24*60*60*1000;
+const dayNames = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+
+let selectedDate = new Date();
+selectedDate.setHours(0,0,0,0);
+let allData = {};      // { "2026-08-17": { washer:{...}, dryer:{...} }, ... }
+let blobId = null;
+let userName = '';
+
+/* ===================== Helpers ===================== */
+function fmtKey(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function mmToClock(mins){
+  const h = Math.floor(mins/60), m = mins%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function fmtRange(startMin, machine){
+  return mmToClock(startMin)+'–'+mmToClock(startMin + DURATION[machine]);
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ===================== Nombre / depto (local, por dispositivo) ===================== */
+function loadName(){
+  userName = localStorage.getItem('lavanderia_depto') || '';
+  document.getElementById('nameInput').value = userName;
+}
+document.getElementById('nameInput').addEventListener('input', (e)=>{
+  userName = e.target.value.trim();
+  localStorage.setItem('lavanderia_depto', userName);
+});
+
+/* ===================== Backend compartido (JSONBlob, sin cuenta) ===================== */
+async function ensureBlob(){
+  const params = new URLSearchParams(location.search);
+  const existing = params.get('data');
+  if(existing){
+    blobId = existing;
+    return true;
+  }
+  // No hay ID todavía: mostrar pantalla de configuración manual
+  showSetupScreen();
+  return false;
+}
+
+function showSetupScreen(){
+  const banner = document.getElementById('setupBanner');
+  banner.innerHTML = `
+    <b>Primero configurá el almacenamiento compartido (una sola vez).</b><br>
+    1. Abrí <a href="https://jsonblob.com" target="_blank" style="color:#9FE3D8;">jsonblob.com</a> en otra pestaña.<br>
+    2. Borrá el contenido del editor y escribí: <code style="background:rgba(255,255,255,.15);padding:1px 5px;border-radius:4px;">{}</code><br>
+    3. Tocá "Save" (o el ícono de guardar). Arriba te va a mostrar una URL como
+    <code style="background:rgba(255,255,255,.15);padding:1px 5px;border-radius:4px;">jsonblob.com/api/jsonBlob/1234567890abcdef</code><br>
+    4. Copiá solo la parte final (después del último /) y pegala acá abajo:
+    <div class="row">
+      <input id="blobIdInput" placeholder="ej: 1234567890abcdef">
+      <button id="useBlobId">Usar este ID</button>
+    </div>
+  `;
+  banner.style.display = 'block';
+  document.getElementById('useBlobId').onclick = ()=>{
+    const id = document.getElementById('blobIdInput').value.trim();
+    if(!id){ showToast('Pegá el ID del blob primero.'); return; }
+    const newUrl = new URL(location.href);
+    newUrl.searchParams.set('data', id);
+    location.href = newUrl.toString();
+  };
+}
+
+
+async function fetchAllData(){
+  try{
+    const res = await fetch(`${API_BASE}/${blobId}`);
+    if(!res.ok) throw new Error('no data');
+    allData = await res.json();
+    if(!allData || typeof allData !== 'object') allData = {};
+  }catch(e){
+    allData = {};
+    showToast('No se pudo cargar. Revisá tu conexión.');
+  }
+}
+async function pushAllData(){
+  try{
+    const res = await fetch(`${API_BASE}/${blobId}`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(allData)
+    });
+    if(!res.ok) throw new Error('save failed');
+  }catch(e){
+    showToast('No se pudo guardar el turno. Probá de nuevo.');
+  }
+}
+
+/* ===================== Render ===================== */
+function renderDays(){
+  const cont = document.getElementById('days');
+  cont.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  for(let i=0;i<7;i++){
+    const d = new Date(today.getTime() + i*DAY_MS);
+    const btn = document.createElement('div');
+    btn.className = 'day-btn' + (fmtKey(d)===fmtKey(selectedDate) ? ' active' : '');
+    const label = i===0 ? 'HOY' : i===1 ? 'MAÑ' : dayNames[d.getDay()];
+    btn.innerHTML = `${label}<span class="num">${d.getDate()}</span>`;
+    btn.onclick = ()=>{ selectedDate = d; renderDays(); renderSlots(); };
+    cont.appendChild(btn);
+  }
+}
+
+const MAX_BOOKINGS_PER_WEEK = 3;
+
+function getVisibleDateKeys(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const keys = [];
+  for(let i=0;i<7;i++){
+    keys.push(fmtKey(new Date(today.getTime() + i*DAY_MS)));
+  }
+  return keys;
+}
+
+function countUserBookings(name){
+  let count = 0;
+  getVisibleDateKeys().forEach(key=>{
+    const day = allData[key];
+    if(!day) return;
+    ['washer','dryer'].forEach(machine=>{
+      const m = day[machine];
+      if(!m) return;
+      Object.values(m).forEach(b=>{ if(b.name === name) count++; });
+    });
+  });
+  return count;
+}
+
+function getDayData(){
+  const key = fmtKey(selectedDate);
+  if(!allData[key]) allData[key] = { washer:{}, dryer:{} };
+  if(!allData[key].washer) allData[key].washer = {};
+  if(!allData[key].dryer) allData[key].dryer = {};
+  return allData[key];
+}
+
+function renderSlots(){
+  const dayData = getDayData();
+  ['washer','dryer'].forEach(machine=>{
+    const cont = document.getElementById(machine+'Slots');
+    cont.innerHTML = '';
+    SLOTS[machine].forEach(startMin=>{
+      const booking = dayData[machine][startMin];
+      const el = document.createElement('div');
+      let cls = 'slot ';
+      let statusText = 'Libre';
+      if(booking){
+        if(userName && booking.name === userName){
+          cls += 'mine';
+          statusText = 'Vos · tocá para cancelar';
+        } else {
+          cls += 'taken';
+          statusText = booking.name;
+        }
+      } else {
+        cls += 'free';
+      }
+      el.className = cls;
+      el.innerHTML = `<span class="time">${fmtRange(startMin, machine)}</span><span class="status">${statusText}</span>`;
+      el.onclick = ()=> handleSlotClick(el, machine, startMin, booking);
+      cont.appendChild(el);
+    });
+  });
+}
+
+async function handleSlotClick(el, machine, startMin, booking){
+  if(!userName){
+    showToast('Escribí tu departamento arriba antes de reservar.');
+    document.getElementById('nameInput').focus();
+    return;
+  }
+  if(booking && booking.name !== userName) return; // ocupado por otra persona
+
+  el.classList.add('loading');
+  await fetchAllData(); // traer la versión más reciente antes de escribir
+  const dayData = getDayData();
+
+  if(dayData[machine][startMin] && dayData[machine][startMin].name === userName){
+    delete dayData[machine][startMin];
+    await pushAllData();
+    renderSlots();
+    showToast('Turno cancelado.');
+  } else if(dayData[machine][startMin]){
+    // alguien más lo tomó justo antes
+    renderSlots();
+    showToast('Ese turno se acaba de ocupar. Elegí otro.');
+  } else if(countUserBookings(userName) >= MAX_BOOKINGS_PER_WEEK){
+    renderSlots();
+    showToast(`Ya tenés ${MAX_BOOKINGS_PER_WEEK} turnos esta semana. Cancelá alguno para reservar otro.`);
+  } else {
+    dayData[machine][startMin] = { name:userName };
+    await pushAllData();
+    renderSlots();
+    showToast(`Reservado: ${machine==='washer'?'lavadora':'secadora'} · ${fmtRange(startMin, machine)}`);
+  }
+}
+
+/* ===================== Init ===================== */
+(async function init(){
+  loadName();
+  renderDays();
+  const ready = await ensureBlob();
+  if(!ready){
+    // Falta configurar el almacenamiento: no cargamos turnos todavía
+    document.getElementById('machines').style.display = 'none';
+    document.querySelector('.hint').style.display = 'none';
+    return;
+  }
+  try{
+    await fetchAllData();
+  }catch(e){
+    showToast('No se pudo conectar. Revisá tu conexión a internet.');
+  }
+  renderSlots();
+})();
+</script>
+</body>
+</html>
